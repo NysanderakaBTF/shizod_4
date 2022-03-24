@@ -23,6 +23,7 @@ void mergesort(string a, string b, string c,int n) {
     fstream f1, f2, f3;
     toy buf,buf2;
     bool bcfile = true;
+    bool need_to_read_b = true, need_to_read_c = true;
     int r_block_size = 1, in_b=0, in_c=0;
     while (r_block_size < n) {
         int ii = 0;
@@ -55,19 +56,25 @@ void mergesort(string a, string b, string c,int n) {
         for (int i = 0; i < kol_it; i++) {
             int cur_por_left_f2 = r_block_size, cur_por_left_f3 = r_block_size;
             while (cur_por_left_f2 > 0 && cur_por_left_f3 > 0) {
-                if(in_b>0) f2 >> buf;
-                if(in_c>0) f3 >> buf2;
+                if(need_to_read_b && in_b >0) f2 >> buf;
+                if(need_to_read_c && in_c>0) f3 >> buf2;
 
                 if (in_b > 0 && in_c > 0) {
                     if (buf.price < buf2.price) {
                         f1 << buf;
                         cur_por_left_f2--; in_b--;
-                        if (in_b > 0 && cur_por_left_f2) f2 >> buf;
+                        if (in_b > 0 && cur_por_left_f2) {
+                            f2 >> buf;
+                            need_to_read_b = false; need_to_read_c = false;
+                        }
                     }
                     else {
                         f1 << buf2;
                         cur_por_left_f3--; in_c--;
-                        if (in_c > 0 && cur_por_left_f3) f3 >> buf2;
+                        if (in_c > 0 && cur_por_left_f3) {
+                            f3 >> buf2;
+                            need_to_read_b = false; need_to_read_c = false;
+                        }
                     }
                 }
                 else {
@@ -89,6 +96,7 @@ void mergesort(string a, string b, string c,int n) {
                     cur_por_left_f2--;
                     if (in_b > 0 && cur_por_left_f2) f2 >> buf;
                 }
+                need_to_read_b = true; need_to_read_c = true;
             }
             else if(in_c > 0&& cur_por_left_f3 > 0){
                 while (cur_por_left_f3 > 0) {
@@ -96,6 +104,7 @@ void mergesort(string a, string b, string c,int n) {
                     cur_por_left_f3--;
                     if (in_c > 0 && cur_por_left_f3) f3 >> buf2;
                 }
+                need_to_read_b = true; need_to_read_c = true;
             }
         }
         r_block_size *= 2;
