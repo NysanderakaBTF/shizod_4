@@ -53,84 +53,6 @@ void mergesort(string a, string b, string c,int n) {
 
         f1.open(a, ios::out); f2.open(b, ios::in); f3.open(c, ios::in);
         int kol_it = max(in_b, in_c);
-       /*for (int i = 0; i < kol_it; i++) {
-            int cur_por_left_f2=0, cur_por_left_f3=0;
-
-            if (r_block_size <= in_b) cur_por_left_f2 = r_block_size;
-            else cur_por_left_f2 = in_b;
-            if (r_block_size <= in_c) cur_por_left_f3 = r_block_size;
-            else cur_por_left_f3 = in_c;
-            while (cur_por_left_f2 > 0 && cur_por_left_f3 > 0) {
-                if(need_to_read_b && in_b >0) f2 >> buf;
-                if(need_to_read_c && in_c>0) f3 >> buf2;
-
-                if (in_b > 0 && in_c > 0) {
-                    if (buf.price < buf2.price) {
-                        f1 << buf;
-                        cur_por_left_f2--; in_b--;
-                        if (in_b > 0 && cur_por_left_f2) {
-                            f2 >> buf;
-                            need_to_read_b = false; need_to_read_c = false;
-                        }
-                        if (in_b == 0 && in_c > 0) {
-                            need_to_read_b = false; need_to_read_c = false;
-                        }
-                    }
-                    else {
-                        f1 << buf2;
-                        cur_por_left_f3--; in_c--;
-                        if (in_c > 0 && cur_por_left_f3) {
-                            f3 >> buf2;
-                            need_to_read_b = false; need_to_read_c = false;
-                        }
-                        if (in_c == 0 && in_b > 0) {
-                            need_to_read_b = false; need_to_read_c = false;
-                        }
-                    }
-                }
-                else {
-                    if (in_b > 0) {
-                       /* f1 << buf;
-                        cur_por_left_f2--; in_b--;
-                        if (in_b > 0 && cur_por_left_f2) f2 >> buf;
-                        while (cur_por_left_f2 > 0) {
-                            f1 << buf; in_b--;
-                            cur_por_left_f2--;
-                            if (in_b > 0 && cur_por_left_f2) f2 >> buf;
-                        }
-                        need_to_read_b = true; need_to_read_c = true;
-                    }
-                    else if(in_c>0) {
-                        /*f1 << buf2;
-                        cur_por_left_f3--; in_c--;
-                        if (in_c > 0 && cur_por_left_f3) f3 >> buf2;
-                        while (cur_por_left_f3 > 0) {
-                            f1 << buf2; in_c--;
-                            cur_por_left_f3--;
-                            if (in_c > 0 && cur_por_left_f3) f3 >> buf2;
-                        }
-                        need_to_read_b = true; need_to_read_c = true;
-                    }
-                }
-            }
-            if (in_b > 0 && cur_por_left_f2 > 0) {
-                while (cur_por_left_f2 > 0) {
-                    f1 << buf; in_b--;
-                    cur_por_left_f2--;
-                    if (in_b > 0 && cur_por_left_f2) f2 >> buf;
-                }
-                need_to_read_b = true; need_to_read_c = true;
-            }
-            else if(in_c > 0&& cur_por_left_f3 > 0){
-                while (cur_por_left_f3 > 0) {
-                    f1 << buf2; in_c--;
-                    cur_por_left_f3--;
-                    if (in_c > 0 && cur_por_left_f3) f3 >> buf2;
-                }
-                need_to_read_b = true; need_to_read_c = true;
-            }
-        }
-        */
         kol_it = min(in_b, in_c)/r_block_size+1;
         for (int i = 0; i < kol_it; i++) {
             int cur_por_left_f2 = 0, cur_por_left_f3 = 0;
@@ -167,6 +89,21 @@ void mergesort(string a, string b, string c,int n) {
                 }
                
             }
+            if (in_b == 0 && in_c > 0) {
+                while (in_c > 0)
+                {
+                    in_c--;
+                    f1 << buf2;
+                    f3 >> buf2;
+                }
+            }
+            if (in_c == 0 && in_b > 0) {
+                while (in_b > 0) {
+                    in_b--; 
+                    f1 << buf;
+                   f2 >> buf;
+                }
+            }
             if (in_b > 0 && cur_por_left_f2 > 0) {
                 while (cur_por_left_f2 > 0) {
                     f1 << buf; in_b--;
@@ -184,13 +121,11 @@ void mergesort(string a, string b, string c,int n) {
                 need_to_read_b = true; need_to_read_c = true;
             }
         }
-        while (in_b > 0) {
-            if (in_b > 0) f2 >> buf;
-            f1 << buf; in_b--;
+        while (in_b > 0) {            
+            if (in_b > 0) f2 >> buf;f1 << buf; in_b--;
         }
         while (in_c > 0) {
-            if (in_c > 0) f3 >> buf;
-            f1 << buf; in_c--;
+            if (in_c > 0) f3 >> buf2;f1 << buf2; in_c--;
         }           
         need_to_read_b = true; need_to_read_c = true;
         r_block_size *= 2;
