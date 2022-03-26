@@ -60,7 +60,8 @@ void quick_inner(toy* a, int n, int l, int r) {
     }
 }
 //i fix it
-void merge(fstream &f1, fstream &f2, fstream &f3, string a, string b, string c, toy &buf, toy &buf2, int &in_b,int &in_c,int &r_block_size,bool &need_to_read_b,bool &need_to_read_c) {
+void merge(fstream &f1, fstream &f2, fstream &f3, string a, string b, string c, 
+    toy &buf, toy &buf2, int &in_b,int &in_c,int &r_block_size,bool &need_to_read_b,bool &need_to_read_c) {
     f1.open(a, ios::out); f2.open(b, ios::in); f3.open(c, ios::in);
     int kol_it = max(in_b, in_c);
     kol_it = min(in_b, in_c) / r_block_size + 1; //кол-во блоков, которых необходимо слить
@@ -123,8 +124,7 @@ void merge(fstream &f1, fstream &f2, fstream &f3, string a, string b, string c, 
                 }
             }
         }
-        comp++;
-        if (in_c == 0 && in_b > 0) {//если файл закончился, то остаток другого переливаем
+        comp++;  if (in_c == 0 && in_b > 0) {//если файл закончился, то остаток другого переливаем
             comp++;
             while (in_b > 0) {
                 comp++; mov++; rw += 2;
@@ -140,36 +140,27 @@ void merge(fstream &f1, fstream &f2, fstream &f3, string a, string b, string c, 
             }
         }
         //после while один из блоков пуст, поэтому переливаем в f1 остаток другого блока
-        comp += 2;
-        if (in_b > 0 && cur_por_left_f2 > 0) {
-            comp++;
-            while (cur_por_left_f2 > 0) {
-                comp++; rw++; mov += 2;
-                f1 << buf; in_b--;
+        comp += 2;  if (in_b > 0 && cur_por_left_f2 > 0) {
+            comp++; while (cur_por_left_f2 > 0) {
+                f1 << buf; in_b--; comp++; rw++; mov += 2;
                 cur_por_left_f2--;
                 comp++;
                 if (in_b > 0 && cur_por_left_f2) { f2 >> buf; rw++; }
-            }
-            mov += 2;
+            } mov += 2;
             need_to_read_b = true; need_to_read_c = true;
         }
         else if (in_c > 0 && cur_por_left_f3 > 0) {
-            comp++;
-            while (cur_por_left_f3 > 0) {
-                comp++; rw++; mov += 2;
-                f1 << buf2; in_c--;
-                cur_por_left_f3--;
-                comp++;
+            comp++; while (cur_por_left_f3 > 0) {
+                f1 << buf2; in_c--;comp++; rw++; mov += 2;
+                cur_por_left_f3--;comp++;
                 if (in_c > 0 && cur_por_left_f3) {
                     f3 >> buf2; rw++;
                 }
             }
-            mov += 2;
-            need_to_read_b = true; need_to_read_c = true;
+             mov += 2; need_to_read_b = true; need_to_read_c = true;
         }
     }
-    comp++;
-    need_to_read_b = true; need_to_read_c = true;
+    need_to_read_b = true; need_to_read_c = true; comp++;
     r_block_size *= 2;//увеличиваем размер блока в 2 раза
     f1.close(); f2.close(); f3.close();
 }
@@ -338,20 +329,26 @@ void hybrid_mergesort(string a, string b, string c, int n,int bars) {//назв�
     f1.open(a, ios::in); f2.open(b, ios::out); f3.open(c, ios::out);
    
     int nn = n,arra_s;
-    toy *arra; 
+    toy *arra; //временный массив для загрузки в озу
+    comp++;
     while (nn > 0) {
+        comp += 2; mov++;
         if (nn >= bars) {
             arra = new toy[bars]; arra_s = bars;
         }
         else {
             arra = new toy[nn]; arra_s = nn;
         }
-        for (int i = 0; i < arra_s; i++) {
+        comp++;
+        for (int i = 0; i < arra_s; i++) { //заполняем массив
+            comp++;
+            rw++; mov += 2;
             toy aaaa;
             f1 >> aaaa;
             arra[i] = aaaa; nn--;
         }
-        quick_inner(arra, arra_s, 0, arra_s - 1);
+        quick_inner(arra, arra_s, 0, arra_s - 1); //внутренняя быстрая сотрировка массива
+       //средний случай O(nlogn)
         comp += 2;
 
         if (bcfile) { //запись в b 
@@ -376,7 +373,7 @@ void hybrid_mergesort(string a, string b, string c, int n,int bars) {//назв�
     }
     f1.close(); f2.close(); f3.close();
     r_block_size = bars;
-
+    //первоначальный этап слияния отстортированных кусочков 
     merge(f1, f2, f3, a, b, c, buf, buf2, in_b, in_c, r_block_size, need_to_read_b, need_to_read_c);
 
     while (r_block_size < n) {//пока размер сливаемого блока меньше кол-ва элементов
@@ -413,118 +410,7 @@ void hybrid_mergesort(string a, string b, string c, int n,int bars) {//назв�
             }
         }
         f1.close(); f2.close(); f3.close();
-        //этап слияния
-        //f1.open(a, ios::out); f2.open(b, ios::in); f3.open(c, ios::in);
-        //int kol_it = max(in_b, in_c);
-        //kol_it = min(in_b, in_c) / r_block_size + 1; //кол-во блоков, которых необходимо слить
-        //mov += 1; comp++;
-        //for (int i = 0; i < kol_it; i++) {
-        //    int cur_por_left_f2 = 0, cur_por_left_f3 = 0; //сколько элементов в блоке осталось
-        //    //если размер блока меньше остатка в файле то остаток = размер блока
-        //    //иначе это оставшееся кол-во в файле
-        //    mov += 4; comp += 2;
-        //    if (r_block_size <= in_b) cur_por_left_f2 = r_block_size;
-        //    else cur_por_left_f2 = in_b;
-        //    if (r_block_size <= in_c) cur_por_left_f3 = r_block_size;
-        //    else cur_por_left_f3 = in_c;
-        //    comp++;
-        //    while (cur_por_left_f2 > 0 && cur_por_left_f3 > 0) {//пока оба блока не пусты
-        //        //читаем элемент, если блок не пустой и из этого файла нужно прочитать следующий 
-        //        //элемент
-        //        comp += 3;
-        //        if (need_to_read_b && in_b > 0) f2 >> buf;
-        //        if (need_to_read_c && in_c > 0) f3 >> buf2;
-        //        comp++;
-        //        if (buf.name.compare(buf2.name) < 0) {//сравниваем и меньший записываем в f1
-        //            f1 << buf; rw++; mov += 2;
-        //            cur_por_left_f2--; in_b--;
-        //            comp += 2; mov += 2;
-        //            if (cur_por_left_f2) {//в каком файле нужно прочитать следующее число
-        //                need_to_read_b = true; need_to_read_c = false;
-        //            }
-        //            else if (cur_por_left_f2 == 0 && cur_por_left_f3 == 0) {
-        //                need_to_read_b = true;
-        //                need_to_read_c = true;
-        //            }
-        //        }
-        //        else {
-        //            f1 << buf2; rw++; mov += 2;
-        //            cur_por_left_f3--; in_c--;
-        //            comp += 2; mov += 2;
-        //            if (cur_por_left_f3) {//в каком файле нужно прочитать следующее число
-        //                need_to_read_b = false; need_to_read_c = true;
-        //            }
-        //            else if (cur_por_left_f2 == 0 && cur_por_left_f3 == 0) {
-        //                need_to_read_b = true;
-        //                need_to_read_c = true;
-        //            }
-        //        }
-        //    }
-        //    comp++;
-        //    if (in_b == 0 && in_c > 0) {//если файл закончился, то остаток другого переливаем
-        //        comp++;
-        //        while (in_c > 0) {
-        //            comp++; mov++; rw += 2;
-        //            in_c--;
-        //            if (r_block_size == 1) {
-        //                f3 >> buf2;
-        //                f1 << buf2;
-        //            }
-        //            else {
-        //                f1 << buf2;
-        //                f3 >> buf2;
-        //            }
-        //        }
-        //    }
-        //    comp++;
-        //    if (in_c == 0 && in_b > 0) {//если файл закончился, то остаток другого переливаем
-        //        comp++;
-        //        while (in_b > 0) {
-        //            comp++; mov++; rw += 2;
-        //            in_b--;
-        //            if (r_block_size == 1) {
-        //                f2 >> buf;
-        //                f1 << buf;
-        //            }
-        //            else {
-        //                f1 << buf;
-        //                f2 >> buf;
-        //            }
-        //        }
-        //    }
-        //    //после while один из блоков пуст, поэтому переливаем в f1 остаток другого блока
-        //    comp += 2;
-        //    if (in_b > 0 && cur_por_left_f2 > 0) {
-        //        comp++;
-        //        while (cur_por_left_f2 > 0) {
-        //            comp++; rw++; mov += 2;
-        //            f1 << buf; in_b--;
-        //            cur_por_left_f2--;
-        //            comp++;
-        //            if (in_b > 0 && cur_por_left_f2) { f2 >> buf; rw++; }
-        //        }
-        //        mov += 2;
-        //        need_to_read_b = true; need_to_read_c = true;
-        //    }
-        //    else if (in_c > 0 && cur_por_left_f3 > 0) {
-        //        comp++;
-        //        while (cur_por_left_f3 > 0) {
-        //            comp++; rw++; mov += 2;
-        //            f1 << buf2; in_c--;
-        //            cur_por_left_f3--;
-        //            comp++;
-        //            if (in_c > 0 && cur_por_left_f3) {
-        //                f3 >> buf2; rw++;
-        //            }
-        //        }
-        //        mov += 2;
-        //        need_to_read_b = true; need_to_read_c = true;
-        //    }
-        //}
-        //comp++;
-        //need_to_read_b = true; need_to_read_c = true;
-        //r_block_size *= 2;//увеличиваем размер блока в 2 раза
-        //f1.close(); f2.close(); f3.close();
+        // слияние отстортированных кусочков 
         merge(f1, f2, f3, a, b, c, buf, buf2, in_b, in_c, r_block_size, need_to_read_b, need_to_read_c);
     }
 }
@@ -542,6 +428,7 @@ int main()
     mov = 0; comp = 0; rw = 0;
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
     hybrid_mergesort(osn, d1, d2,kol, as);
+    //mergesort(osn, d1, d2, kol);
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     std::cout << "Runnig time = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;
     std::cout << "Runnig time = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[mics]" << std::endl;
