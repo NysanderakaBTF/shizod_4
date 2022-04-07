@@ -228,6 +228,7 @@ void mergesort(string a, string b, string c, int n) {//название файл
                 if (need_to_read_c && in_c > 0) f3 >> buf2;
                 comp++;
                 if(buf.name.compare(buf2.name)<0){//сравниваем и меньший записываем в f1
+                /*if (buf.price < buf2.price) {*/
                     f1 << buf; rw++; mov += 2;
                     cur_por_left_f2--; in_b--;
                     comp += 2; mov += 2;
@@ -427,8 +428,8 @@ int main()
     cin >> as;
     mov = 0; comp = 0; rw = 0;
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    hybrid_mergesort(osn, d1, d2,kol, as);
-    //mergesort(osn, d1, d2, kol);
+    //hybrid_mergesort(osn, d1, d2,kol, as);
+    mergesort(osn, d1, d2, kol);
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     std::cout << "Runnig time = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;
     std::cout << "Runnig time = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << "[mics]" << std::endl;
